@@ -30,13 +30,14 @@ EvtScript N(D_80243C40_E123E0) = {
 };
 
 #if VERSION_PAL
-s32  N(pal_unkdata)[] = {
-  230, 238, 234, 246,
+s32 N(PalBoardWidth)[] = {
+    230, 238, 234, 246,
 };
 
-s32 N(pal_unkdata_2)[] = {
+s32 N(PalBoardX)[] = {
     45, 41, 43, 37
 };
+#endif
 
 Gfx N(Gfx_RecordDisplay_Init)[] = {
     gsDPSetCycleType(G_CYC_1CYCLE),
@@ -47,30 +48,111 @@ Gfx N(Gfx_RecordDisplay_Init)[] = {
     gsDPSetCombineKey(G_CK_NONE),
     gsDPSetAlphaCompare(G_AC_NONE),
     gsDPNoOp(),
-    gsSPEndDisplayList(),
-};
-#else
-Gfx N(Gfx_RecordDisplay_Init)[] = {
-    gsDPSetCycleType(G_CYC_1CYCLE),
-    gsDPSetRenderMode(G_RM_XLU_SURF, G_RM_XLU_SURF2),
-    gsDPSetCombineMode(G_CC_PRIMITIVE, G_CC_PRIMITIVE),
-    gsDPSetColorDither(G_CD_DISABLE),
-    gsDPSetAlphaDither(G_AD_DISABLE),
-    gsDPSetCombineKey(G_CK_NONE),
-    gsDPSetAlphaCompare(G_AC_NONE),
-    gsDPNoOp(),
+#if !VERSION_PAL
     gsDPSetPrimColor(0, 0, 255, 0, 0, 0),
     gsDPFillRectangle(44, 49, 276, 51),
     gsDPFillRectangle(44, 49, 46, 133),
     gsDPFillRectangle(275, 49, 276, 133),
     gsDPFillRectangle(44, 132, 276, 133),
+#endif
     gsSPEndDisplayList(),
 };
-#endif
 
 #if VERSION_PAL
-void N(draw_record_display)(RecordDisplayData* data, s32 alpha);
-INCLUDE_ASM(void, "world/area_mgm/mgm_00/mgm_00_3_scoreboard", mgm_00_draw_record_display);
+void N(draw_record_display)(RecordDisplayData* data, s32 alpha) {
+    s32 xOffset;
+    s32 msg1, msg2, msg3;
+
+    if (alpha > 0) {
+        gSPDisplayList(gMainGfxPos++, N(Gfx_RecordDisplay_Init));
+
+        if (gCurrentLanguage == LANGUAGE_FR) {
+            xOffset = 36;
+        } else {
+            xOffset = 0;
+        }
+
+        gDPSetPrimColor(gMainGfxPos++, 0, 0, 255, 0, 0, 0);
+        gDPFillRectangle(gMainGfxPos++, N(PalBoardX)[gCurrentLanguage] - 1,
+                                        49,
+                                        N(PalBoardX)[gCurrentLanguage] + N(PalBoardWidth)[gCurrentLanguage] + 1,
+                                        51);
+        gDPFillRectangle(gMainGfxPos++, N(PalBoardX)[gCurrentLanguage] - 1,
+                                        49,
+                                        N(PalBoardX)[gCurrentLanguage] + 1,
+                                        133);
+        gDPFillRectangle(gMainGfxPos++, N(PalBoardX)[gCurrentLanguage] + N(PalBoardWidth)[gCurrentLanguage],
+                                        49,
+                                        N(PalBoardX)[gCurrentLanguage] + N(PalBoardWidth)[gCurrentLanguage] + 1,
+                                        133);
+        gDPFillRectangle(gMainGfxPos++, N(PalBoardX)[gCurrentLanguage] - 1,
+                                        132,
+                                        N(PalBoardX)[gCurrentLanguage] + N(PalBoardWidth)[gCurrentLanguage] + 1,
+                                        133);
+        gDPPipeSync(gMainGfxPos++);
+        gDPSetPrimColor(gMainGfxPos++, 0, 0, 16, 120, 24, alpha * 0.65);
+        gDPFillRectangle(gMainGfxPos++, N(PalBoardX)[gCurrentLanguage] + 3,
+                                        53,
+                                        N(PalBoardX)[gCurrentLanguage] + N(PalBoardWidth)[gCurrentLanguage] - 3,
+                                        129);
+        gDPPipeSync(gMainGfxPos++);
+        msg_draw_frame(N(PalBoardX)[gCurrentLanguage], 50, N(PalBoardWidth)[gCurrentLanguage], 82, MSG_STYLE_INSPECT, 0, 1, (s32)(alpha * 0.55), alpha); // cast needed if signature isn't present
+        if (data->gameType == MINIGAME_TYPE_JUMP) {
+            draw_msg(MSG_MGM_001C, N(PalBoardX)[gCurrentLanguage] + (N(PalBoardWidth)[gCurrentLanguage] - get_msg_width(MSG_MGM_001C, 0)) / 2, 57, alpha, MSG_PAL_TEAL, 0);
+            draw_number(gPlayerData.jumpGamePlays,  N(PalBoardX)[gCurrentLanguage] + 174 + xOffset, 78,  DRAW_NUMBER_CHARSET_THIN, MSG_PAL_WHITE, alpha, DRAW_NUMBER_STYLE_MONOSPACE | DRAW_NUMBER_STYLE_ALIGN_RIGHT);
+            draw_number(gPlayerData.jumpGameTotal,  N(PalBoardX)[gCurrentLanguage] + 174 + xOffset, 93,  DRAW_NUMBER_CHARSET_THIN, MSG_PAL_WHITE, alpha, DRAW_NUMBER_STYLE_MONOSPACE | DRAW_NUMBER_STYLE_ALIGN_RIGHT);
+            draw_number(gPlayerData.jumpGameRecord, N(PalBoardX)[gCurrentLanguage] + 174 + xOffset, 108, DRAW_NUMBER_CHARSET_THIN, MSG_PAL_WHITE, alpha, DRAW_NUMBER_STYLE_MONOSPACE | DRAW_NUMBER_STYLE_ALIGN_RIGHT);
+            if (gPlayerData.jumpGamePlays == 1) {
+                msg1 = MSG_PAL_MGM_0024;
+            } else {
+                msg1 = MSG_MGM_0023;
+            }
+            if (gPlayerData.jumpGameTotal == 1) {
+                msg2 = MSG_PAL_MGM_0021;
+            } else {
+                msg2 = MSG_MGM_0021;
+            }
+            if (gPlayerData.jumpGameRecord == 1) {
+                msg3 = MSG_PAL_MGM_0021;
+            } else {
+                msg3 = MSG_MGM_0021;
+            }
+        } else {
+            draw_msg(MSG_MGM_001D, N(PalBoardX)[gCurrentLanguage] + (N(PalBoardWidth)[gCurrentLanguage] - get_msg_width(MSG_MGM_001D, 0)) / 2, 57, alpha, MSG_PAL_TEAL, 0);
+            draw_number(gPlayerData.smashGamePlays,  N(PalBoardX)[gCurrentLanguage] + 174 + xOffset, 78,  DRAW_NUMBER_CHARSET_THIN, MSG_PAL_WHITE, alpha, DRAW_NUMBER_STYLE_MONOSPACE | DRAW_NUMBER_STYLE_ALIGN_RIGHT);
+            draw_number(gPlayerData.smashGameTotal,  N(PalBoardX)[gCurrentLanguage] + 174 + xOffset, 93,  DRAW_NUMBER_CHARSET_THIN, MSG_PAL_WHITE, alpha, DRAW_NUMBER_STYLE_MONOSPACE | DRAW_NUMBER_STYLE_ALIGN_RIGHT);
+            draw_number(gPlayerData.smashGameRecord, N(PalBoardX)[gCurrentLanguage] + 174 + xOffset, 108, DRAW_NUMBER_CHARSET_THIN, MSG_PAL_WHITE, alpha, DRAW_NUMBER_STYLE_MONOSPACE | DRAW_NUMBER_STYLE_ALIGN_RIGHT);
+            if (gPlayerData.smashGamePlays == 1) {
+                msg1 = MSG_PAL_MGM_0024;
+            } else {
+                msg1 = MSG_MGM_0023;
+            }
+            if (gPlayerData.smashGameTotal == 1) {
+                msg2 = MSG_PAL_MGM_0021;
+            } else {
+                msg2 = MSG_MGM_0021;
+            }
+            if (gPlayerData.smashGameRecord == 1) {
+                msg3 = MSG_PAL_MGM_0021;
+            } else {
+                msg3 = MSG_MGM_0021;
+            }
+        }
+
+        draw_msg(MSG_MGM_001E, N(PalBoardX)[gCurrentLanguage] + 13,  78,  alpha, MSG_PAL_WHITE, DRAW_MSG_STYLE_MENU);
+        if (gCurrentLanguage != LANGUAGE_FR) {
+            draw_msg(msg1, N(PalBoardX)[gCurrentLanguage] + 178 + xOffset, 78,  alpha, MSG_PAL_WHITE, DRAW_MSG_STYLE_MENU);
+        }
+        draw_msg(MSG_MGM_001F, N(PalBoardX)[gCurrentLanguage] + 13,  93,  alpha, MSG_PAL_WHITE, DRAW_MSG_STYLE_MENU);
+        if (gCurrentLanguage != LANGUAGE_FR) {
+            draw_msg(msg2, N(PalBoardX)[gCurrentLanguage] + 178 + xOffset, 93,  alpha, MSG_PAL_WHITE, DRAW_MSG_STYLE_MENU);
+        }
+        draw_msg(MSG_MGM_0020, N(PalBoardX)[gCurrentLanguage] + 13,  108, alpha, MSG_PAL_WHITE, DRAW_MSG_STYLE_MENU);
+        if (gCurrentLanguage != LANGUAGE_FR) {
+            draw_msg(msg3, N(PalBoardX)[gCurrentLanguage] + 178 + xOffset, 108, alpha, MSG_PAL_WHITE, DRAW_MSG_STYLE_MENU);
+        }
+    }
+}
 #else
 void N(draw_record_display)(RecordDisplayData* data, s32 alpha) {
     if (alpha > 0) {

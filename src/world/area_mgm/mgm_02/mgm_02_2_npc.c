@@ -13,12 +13,10 @@ void partner_enable_input(void);
 
 #define PLAY_COST   10
 #define PLAY_TIME   ((s32)(900 * DT))
+#define EXTRA_PLAY_TIME   ((s32)(10 * DT))
 #define FRAME_RATE ((s32)(30 * DT))
 #define NUM_BOXES   35
 #define NUM_PANELS  10
-
-#define SMASH_DATA_VAR_IDX 0
-#define SMASH_DATA_VAR_IDX 0
 
 #define FUZZY_NPC_ID_BASE  NPC_Fuzzy_01
 #define BOBOMB_NPC_ID_BASE NPC_Bobomb_01
@@ -33,14 +31,14 @@ extern s32 N(BoxModelIDs)[NUM_BOXES];
 extern s32 N(BoxColliderIDs)[NUM_BOXES];
 extern s32 N(PanelModelIDs)[NUM_PANELS];
 
-BSS s32 D_80248600[NUM_PANELS]; //TODO set name: PanelModelsAssigned
+BSS s32 PanelModelsAssigned[NUM_PANELS];
 
 extern IMG_BIN N(panel_peach_img);
 extern PAL_BIN N(panel_peach_pal);
 
 API_CALLABLE(N(SetMsgImgs_Panel));
 
-extern EvtScript N(read_sign_instructions); // EVT_ReadSign
+extern EvtScript N(EVT_ReadSign);
 
 typedef enum SmashGameBoxCotent {
     BOX_CONTENT_FUZZY       = 0,
@@ -247,7 +245,7 @@ API_CALLABLE(N(CreateSignpost)) {
     SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX];
     s32 entityIndex = create_entity(&Entity_Signpost, 355, 20, -180, 0, 0, 0, 0, MAKE_ENTITY_END);
     data->signpostEntity = entityIndex;
-    get_entity_by_index(entityIndex)->boundScriptBytecode = &N(read_sign_instructions);
+    get_entity_by_index(entityIndex)->boundScriptBytecode = &N(EVT_ReadSign);
 
     return ApiStatus_DONE2;
 }
@@ -288,22 +286,23 @@ API_CALLABLE(N(OnHitBox)) {
     return ApiStatus_DONE2;
 }
 
-#if VERSION_PAL
-API_CALLABLE(N(SetBoxContents));
-INCLUDE_ASM(ApiResult, "world/area_mgm/mgm_02/mgm_02_2_npc", mgm_02_SetBoxContents);
-#else
 API_CALLABLE(N(SetBoxContents)) {
     s32 initialConfiguration;
     s32 configuration[NUM_BOXES];
     s32 indexA, indexB, temp;
     s32 i, j;
+    SmashGameData* data;
 
     Enemy* enemy;
     Npc* npc;
 
-    SmashGameData* data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX];
+#if VERSION_PAL
+    N(pal_variable) = 1;
+#endif
+
+    data = get_enemy(SCOREKEEPER_ENEMY_IDX)->varTablePtr[SMASH_DATA_VAR_IDX];
     data->found = 0;
-    data->timeLeft = PLAY_TIME + 10;
+    data->timeLeft = PLAY_TIME + EXTRA_PLAY_TIME;
     data->curScore = 0;
     data->mashProgress = 0;
     data->stunFlags = 0;
@@ -351,8 +350,8 @@ API_CALLABLE(N(SetBoxContents)) {
         enemy->varTable[0] = 0;
     }
 
-    for (i = 0; i < ARRAY_COUNT(D_80248600); i++) {
-        D_80248600[i] = FALSE;
+    for (i = 0; i < ARRAY_COUNT(PanelModelsAssigned); i++) {
+        PanelModelsAssigned[i] = FALSE;
     }
 
     for (i = 0; i < NUM_BOXES; i++) {
@@ -399,27 +398,22 @@ API_CALLABLE(N(SetBoxContents)) {
                     }
                 }
                 // ARRAY BOUNDS ERROR IN ORIGINAL CODE!
-                for (j = 0; j <= ARRAY_COUNT(D_80248600); j++) {
-                    if (!D_80248600[j]) {
-                        D_80248600[j] = TRUE;
+                for (j = 0; j <= ARRAY_COUNT(PanelModelsAssigned); j++) {
+                    if (!PanelModelsAssigned[j]) {
+                        PanelModelsAssigned[j] = TRUE;
                         data->box[i].peachPanelModelID = N(PanelModelIDs[j]);
                         break;
                     }
                 }
                 break;
-            case 3:
+            case BOX_CONTENT_EMPTY:
                 data->box[i].state = BOX_STATE_EMPTY_INIT;
                 break;
         }
     }
     return ApiStatus_DONE2;
 }
-#endif
 
-#if VERSION_PAL
-API_CALLABLE(N(RunMinigame));
-INCLUDE_ASM(ApiResult, "world/area_mgm/mgm_02/mgm_02_2_npc", mgm_02_RunMinigame);
-#else
 API_CALLABLE(N(RunMinigame)) {
     SmashGameData* data;
     Enemy* enemy;
@@ -770,6 +764,35 @@ API_CALLABLE(N(RunMinigame)) {
     if (data->timeLeft > 0) {
         if (data->found < NUM_PANELS) {
             data->timeLeft--;
+#if VERSION_PAL
+            if (data->timeLeft == 625) {
+                sfx_play_sound(SOUND_01A5);
+            } else if (data->timeLeft == 500) {
+                sfx_play_sound(SOUND_01A5);
+            } else if (data->timeLeft == 375) {
+                sfx_play_sound(SOUND_01A5);
+            } else if (data->timeLeft == 250) {
+                sfx_play_sound(SOUND_01A6);
+            } else if (data->timeLeft == 225) {
+                sfx_play_sound(SOUND_01A6);
+            } else if (data->timeLeft == 200) {
+                sfx_play_sound(SOUND_01A6);
+            } else if (data->timeLeft == 175) {
+                sfx_play_sound(SOUND_01A6);
+            } else if (data->timeLeft == 150) {
+                sfx_play_sound(SOUND_01A6);
+            } else if (data->timeLeft == 125) {
+                sfx_play_sound(SOUND_01A7);
+            } else if (data->timeLeft == 100) {
+                sfx_play_sound(SOUND_01A7);
+            } else if (data->timeLeft == 75) {
+                sfx_play_sound(SOUND_01A7);
+            } else if (data->timeLeft == 50) {
+                sfx_play_sound(SOUND_01A7);
+            } else if (data->timeLeft == 25) {
+                sfx_play_sound(SOUND_01A7);
+            }
+#else
             if (data->timeLeft == 750) {
                 sfx_play_sound(SOUND_01A5);
             } else if (data->timeLeft == 600) {
@@ -797,6 +820,7 @@ API_CALLABLE(N(RunMinigame)) {
             } else if (data->timeLeft == 30) {
                 sfx_play_sound(SOUND_01A7);
             }
+#endif
         }
         if ((data->timeLeft > 0) && (data->found == NUM_PANELS)) {
             if (!(data->stunFlags & STUN_FLAG_STUNNED)) {
@@ -824,6 +848,9 @@ API_CALLABLE(N(RunMinigame)) {
         gameFinished = TRUE;
     }
     if (gameFinished) {
+#if VERSION_PAL
+        N(pal_variable) = 0;
+#endif
         if (data->stunFlags & STUN_FLAG_STUNNED) {
             enable_player_input();
             partner_enable_input();
@@ -844,7 +871,6 @@ API_CALLABLE(N(RunMinigame)) {
 
     return ApiStatus_BLOCK;
 }
-#endif
 
 API_CALLABLE(N(UpdateRecords)) {
     PlayerData* playerData = &gPlayerData;
@@ -1066,7 +1092,7 @@ EvtScript N(EVS_CreateScoreDisplay) = {
     EVT_END
 };
 
-EvtScript N(read_sign_instructions) = {
+EvtScript N(EVT_ReadSign) = {
     EVT_CALL(DisablePlayerInput, TRUE)
     EVT_CALL(N(SetMsgImgs_Panel))
     EVT_CALL(ShowMessageAtScreenPos, MSG_MGM_0046, 160, 40)
