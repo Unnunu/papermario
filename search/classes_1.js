@@ -1,14 +1,14 @@
 var searchData=
 [
   ['backgroundheader_0',['BackgroundHeader',['../common__structs_8h.html#structBackgroundHeader',1,'']]],
-  ['badgehint_1',['BadgeHint',['../hos__06__5__merluvlee_8c.html#structBadgeHint',1,'']]],
+  ['badgehint_1',['BadgeHint',['../merluvlee_8c.html#structBadgeHint',1,'']]],
   ['balloonfxdata_2',['BalloonFXData',['../effects_8h.html#structBalloonFXData',1,'']]],
-  ['barricadepart_3',['BarricadePart',['../omo__02__5__barricade_8c.html#structBarricadePart',1,'']]],
+  ['barricadepart_3',['BarricadePart',['../barricade_8c.html#structBarricadePart',1,'']]],
   ['battle_4',['Battle',['../src_2battle_2battle_8h.html#structBattle',1,'']]],
   ['battlearea_5',['BattleArea',['../src_2battle_2battle_8h.html#structBattleArea',1,'']]],
   ['battlemoveentry_6',['BattleMoveEntry',['../src_2battle_2battle_8h.html#structBattleMoveEntry',1,'']]],
   ['battlestatus_7',['BattleStatus',['../structBattleStatus.html',1,'']]],
-  ['battlestatus_2e_5f_5funnamed18_5f_5f_8',['BattleStatus.__unnamed18__',['../common__structs_8h.html#unionBattleStatus_8____unnamed18____',1,'']]],
+  ['battlestatus_2e_5f_5funnamed31_5f_5f_8',['BattleStatus.__unnamed31__',['../common__structs_8h.html#unionBattleStatus_8____unnamed31____',1,'']]],
   ['bgmdruminfo_9',['BGMDrumInfo',['../audio_8h.html#structBGMDrumInfo',1,'']]],
   ['bgmfileinfo_10',['BGMFileInfo',['../audio_8h.html#structBGMFileInfo',1,'']]],
   ['bgmheader_11',['BGMHeader',['../audio_8h.html#structBGMHeader',1,'']]],
@@ -30,6 +30,6 @@ var searchData=
   ['bufferentry_27',['BufferEntry',['../303c0__len__3e10_8c.html#structBufferEntry',1,'']]],
   ['bulbfragment_28',['BulbFragment',['../light__bulb_8c.html#structBulbFragment',1,'']]],
   ['bulbglowfxdata_29',['BulbGlowFXData',['../effects_8h.html#structBulbGlowFXData',1,'']]],
-  ['bulletinboardentry_30',['BulletinBoardEntry',['../mac__01__7__bulletin_8c.html#structBulletinBoardEntry',1,'']]],
+  ['bulletinboardentry_30',['BulletinBoardEntry',['../bulletin_8c.html#structBulletinBoardEntry',1,'']]],
   ['butterfliesfxdata_31',['ButterfliesFXData',['../effects_8h.html#structButterfliesFXData',1,'']]]
 ];
